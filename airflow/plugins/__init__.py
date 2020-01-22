@@ -7,5 +7,6 @@ import operators
 class CustomPlugin(AirflowPlugin):
     name = "custom_plugin"
     operators = [
-        operators.StageS3ToRedshiftOperator
+        operators.StageS3ToRedshiftOperator,
+        operators.DataQualityOperator
     ]

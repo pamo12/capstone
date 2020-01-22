@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators import StageS3ToRedshiftOperator
+from airflow.operators import DataQualityOperator
 
 
 dag = DAG('data_load',
@@ -58,13 +59,23 @@ stage_bookings_to_redshift = StageS3ToRedshiftOperator(
     json_path='auto'
 )
 
+run_quality_checks_stage = DataQualityOperator(
+    task_id='data_quality_checks',
+    dag=dag,
+    tables='stage_vehicles,stage_rental_zones,stage_bookings,stage_categories',
+    redshift_conn_id='redshift',
+    sql='SELECT COUNT(*) FROM {}'
+)
+
 
 start_operator >> stage_vehicles_to_redshift
 start_operator >> stage_rental_zones_to_redshift
 start_operator >> stage_categories_to_redshift
 start_operator >> stage_bookings_to_redshift
 
-stage_vehicles_to_redshift >> end_operator
-stage_rental_zones_to_redshift >> end_operator
-stage_categories_to_redshift >> end_operator
-stage_bookings_to_redshift  >> end_operator
+stage_vehicles_to_redshift >> run_quality_checks_stage
+stage_rental_zones_to_redshift >> run_quality_checks_stage
+stage_categories_to_redshift >> run_quality_checks_stage
+stage_bookings_to_redshift >> run_quality_checks_stage
+
+run_quality_checks_stage >> end_operator
