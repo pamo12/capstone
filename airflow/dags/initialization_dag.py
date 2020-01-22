@@ -65,6 +65,12 @@ create_stage_vehicles_task = PostgresOperator(
     sql=sql_statements.CREATE_TABLE_STAGE_VEHICLES
 )
 
+create_stage_bookings_task = PostgresOperator(
+    task_id='create_stage_bookings',
+    dag=dag,
+    postgres_conn_id='redshift',
+    sql=sql_statements.CREATE_TABLE_STAGE_BOOKINGS
+)
 
 start_operator >> drop_stage_vehicles_task
 drop_stage_vehicles_task >> create_stage_vehicles_task
@@ -79,4 +85,5 @@ drop_stage_categories_task >> create_stage_categories_task
 create_stage_categories_task >> end_operator
 
 start_operator >> drop_stage_bookings_task
-drop_stage_bookings_task >> end_operator
+drop_stage_bookings_task >> create_stage_bookings_task
+create_stage_bookings_task >> end_operator
