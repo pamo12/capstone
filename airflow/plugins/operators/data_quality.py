@@ -2,6 +2,7 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
+
 class DataQualityOperator(BaseOperator):
     
     ui_color = '#89DA59'
@@ -17,7 +18,6 @@ class DataQualityOperator(BaseOperator):
         self.redshift_conn_id = redshift_conn_id
         self.tables = tables
         self.sql = sql
-        
 
     def execute(self, context):
         redshift = PostgresHook(self.redshift_conn_id)
@@ -33,7 +33,8 @@ class DataQualityOperator(BaseOperator):
             self.log.info(f'SQL to be executed: {formatted_sql}')
             records = redshift.get_records(formatted_sql)
             num_records = records[0][0]
-            if len(records) < 1 or len(records[0]) < 1:
+
+            if len(records) < 1 or num_records < 1:
                 checks_passed = False
                 affected_tables.append(table)
 
