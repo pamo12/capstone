@@ -123,7 +123,7 @@ CREATE_TABLE_DIM_VEHICLES = """
         kw INT,
         fuel_type_name VARCHAR(25),
         ownership_type VARCHAR(50),
-        capacity_amount INT,
+        capacity_amount VARCHAR(10),
         access_control_component_type VARCHAR(50)
     );
 """
@@ -148,8 +148,8 @@ CREATE_TABLE_DIM_RENTAL_ZONES = """
         type VARCHAR(50),
         city VARCHAR(50),
         country VARCHAR(50),
-        latitude DECIMAL,
-        longitude DECIMAL,
+        latitude VARCHAR(25),
+        longitude VARCHAR(25),
         is_airport_x BOOLEAN,
         is_long_distance_trains_x BOOLEAN,
         is_suburban_trains_x BOOLEAN,
@@ -177,6 +177,18 @@ CREATE_TABLE_DIM_CATEGORIES = """
 
 CREATE_TABLE_DIM_DATE = """
     CREATE TABLE public.dim_date (
-        date_sk INT PRIMARY KEY
+        date_sk INT PRIMARY KEY,
+        date_value Date NOT NULL,
+        year_number SMALLINT NOT NULL,
+        year_week_number SMALLINT NOT NULL,
+        year_day_number SMALLINT NOT NULL,
+        quarter_number SMALLINT NOT NULL,
+        month_number SMALLINT NOT NULL,
+        month_name CHAR(9) NOT NULL,
+        month_day_number SMALLINT NOT NULL,
+        week_day_number SMALLINT NOT NULL,
+        day_name CHAR(9) NOT NULL,
+        day_is_weekday SMALLINT NOT NULL,
+        day_is_last_of_month SMALLINT NOT NULL
     );
 """
