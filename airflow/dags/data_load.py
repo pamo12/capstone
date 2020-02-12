@@ -4,8 +4,14 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators import StageS3ToRedshiftOperator
 from airflow.operators import DataQualityOperator
 from airflow.operators import LoadDimensionOperator
+from airflow.operators import LoadFactOperator
+from airflow.operators.subdag_operator import SubDagOperator
 
 import load_statements
+import sub_load_dimensions
+import sub_load_stage
+import sub_load_facts
+
 
 dag = DAG('data_load',
           description='Populate Immigration data to Redshift',
@@ -73,7 +79,7 @@ load_vehicle_model_dimension = LoadDimensionOperator(
     task_id='load_vehicle_models',
     dag=dag,
     redshift_conn_id='redshift',
-    select_sql=load_statements.LOAD_VEHICLE_MODELS,
+    sql=load_statements.LOAD_VEHICLE_MODELS,
     table='dim_vehicle_models',
     refresh_table=True
 )
@@ -82,7 +88,7 @@ load_company_dimension = LoadDimensionOperator(
     task_id='load_companies',
     dag=dag,
     redshift_conn_id='redshift',
-    select_sql=load_statements.LOAD_COMPANIES,
+    sql=load_statements.LOAD_COMPANIES,
     table='dim_companies',
     refresh_table=True
 )
@@ -91,7 +97,7 @@ load_category_dimension = LoadDimensionOperator(
     task_id='load_categories',
     dag=dag,
     redshift_conn_id='redshift',
-    select_sql=load_statements.LOAD_CATEGORIES,
+    sql=load_statements.LOAD_CATEGORIES,
     table='dim_categories',
     refresh_table=True
 )
@@ -100,7 +106,7 @@ load_vehicle_dimension = LoadDimensionOperator(
     task_id='load_vehicles',
     dag=dag,
     redshift_conn_id='redshift',
-    select_sql=load_statements.LOAD_VEHICLES,
+    sql=load_statements.LOAD_VEHICLES,
     table='dim_vehicles',
     refresh_table=True
 )
@@ -109,7 +115,7 @@ load_rental_zone_dimension = LoadDimensionOperator(
     task_id='load_rental_zones',
     dag=dag,
     redshift_conn_id='redshift',
-    select_sql=load_statements.LOAD_RENTAL_ZONES,
+    sql=load_statements.LOAD_RENTAL_ZONES,
     table='dim_rental_zones',
     refresh_table=True
 )
@@ -118,9 +124,17 @@ load_date_dimension = LoadDimensionOperator(
     task_id='load_dates',
     dag=dag,
     redshift_conn_id='redshift',
-    select_sql=load_statements.LOAD_DATES,
+    sql=load_statements.LOAD_DATES,
     table='dim_date',
     refresh_table=True
+)
+
+load_fact_bookings = LoadFactOperator(
+    task_id='load_bookings',
+    dag=dag,
+    redshift_conn_id='redshift',
+    sql=load_statements.LOAD_BOOKING_FACTS,
+    table='fact_bookings'
 )
 
 run_quality_checks_base_dims = DataQualityOperator(
@@ -135,6 +149,14 @@ run_quality_checks_dep_dims = DataQualityOperator(
     task_id='data_quality_checks_dep_dims',
     dag=dag,
     tables='dim_vehicles,dim_categories,dim_rental_zones',
+    redshift_conn_id='redshift',
+    sql='SELECT COUNT(*) FROM {}'
+)
+
+run_quality_checks_facts = DataQualityOperator(
+    task_id='data_quality_checks_facts',
+    dag=dag,
+    tables='fact_bookings',
     redshift_conn_id='redshift',
     sql='SELECT COUNT(*) FROM {}'
 )
@@ -168,4 +190,6 @@ load_category_dimension >> run_quality_checks_dep_dims
 load_vehicle_dimension >> run_quality_checks_dep_dims
 load_rental_zone_dimension >> run_quality_checks_dep_dims
 
-run_quality_checks_dep_dims >> end_operator
+run_quality_checks_dep_dims >> load_fact_bookings
+load_fact_bookings >> run_quality_checks_facts
+run_quality_checks_facts >> end_operator

@@ -1,6 +1,9 @@
 LOAD_VEHICLE_MODELS = """
     INSERT INTO dim_vehicle_models (vehicle_manufacturer, vehicle_model_type, vehicle_model_name)
-    SELECT DISTINCT vehicle_manufacturer_name, vehicle_model_type, vehicle_model_name
+    SELECT DISTINCT
+        vehicle_manufacturer_name, 
+        vehicle_model_type, 
+        vehicle_model_name
     FROM stage_vehicles
 """
 
@@ -11,8 +14,26 @@ LOAD_COMPANIES = """
 """
 
 LOAD_DATES = """
-    INSERT INTO dim_date 
-    SELECT 1, '2020-01-17', 2020, 1, 1, 1, 1, 'January', 27, 1, 'Monday', 1, 0 
+    INSERT INTO dim_date (date_value, year_number, year_week_number, year_day_number, quarter_number, month_number, month_name,
+                        month_day_number, week_day_number, day_name, is_weekend)
+    SELECT 
+        dat AS date,
+        DATE_PART(year,dat) AS year_number,
+        DATE_PART(week,dat) AS year_week_number,
+        DATE_PART(doy,dat) AS year_day_number,
+        DATE_PART(qtr, dat) AS quarter_number,
+        DATE_PART(mm,dat) AS month_number,
+        TO_CHAR(dat, 'Mon') AS month_name,
+        DATE_PART(day,dat) AS month_day_number,
+        DATE_PART(dow,dat) AS week_day_number,
+        TO_CHAR(dat, 'Day') AS day_name,
+        DECODE(DATE_PART(dow,dat),0,true,6,true,false) AS is_weekend
+    FROM
+        (SELECT
+        TRUNC(DATEADD(day, ROW_NUMBER () over ()-1, '2010-01-01')) AS dat
+        FROM stage_bookings
+        LIMIT 10000
+        )
 """
 
 LOAD_CATEGORIES = """
@@ -46,5 +67,29 @@ LOAD_RENTAL_ZONES = """
      DECODE(rz.active_x, 'Ja', 1, 0) as active_x
     FROM stage_rental_zones rz
     JOIN dim_companies co ON rz.company = co.company AND rz.company_group = co.company_group      
-    
+"""
+
+LOAD_BOOKING_FACTS = """
+    SELECT
+     b.booking_hal_id,
+     CASE WHEN ca.category_sk IS NULL THEN 0 ELSE ca.category_sk END,
+     CASE WHEN v.vehicle_sk IS NULL THEN 0 ELSE v.vehicle_sk END,
+     CASE WHEN booking.date_sk IS NULL THEN 0 ELSE booking.date_sk END,
+     CASE WHEN start_date.date_sk IS NULL THEN 0 ELSE start_date.date_sk END,
+     CASE WHEN end_date.date_sk IS NULL THEN 0 ELSE end_date.date_sk END,
+     CASE WHEN start_zone.rental_zone_sk IS NULL THEN 0 ELSE start_zone.rental_zone_sk END,
+     CASE WHEN end_zone.rental_zone_sk IS NULL THEN 0 ELSE end_zone.rental_zone_sk END,
+     b.distance,
+     DATEDIFF(minutes, b.date_from, b.date_until) AS duration,
+     DECODE(traverse_use, 'Ja', 1, 0) AS is_traverse_use,
+     DECODE(compute_extra_booking_fee, 'Ja', 1, 0) AS is_extra_booking_fee,
+     b.technical_income_channel
+    FROM stage_bookings b
+    LEFT JOIN dim_categories ca ON b.category_hal_id = ca.category_nk
+    LEFT JOIN dim_vehicles v ON b.vehicle_hal_id = v.vehicle_nk
+    LEFT JOIN dim_date booking ON DATE(b.date_booking) = booking.date_value
+    LEFT JOIN dim_date start_date ON DATE(b.date_from) = start_date.date_value
+    LEFT JOIN dim_date end_date ON DATE(b.date_until) = end_date.date_value
+    LEFT JOIN dim_rental_zones start_zone ON b.start_rental_zone_hal_id = start_zone.rental_zone_nk AND b.rental_zone_hal_src = start_zone.rental_zone_src
+    LEFT JOIN dim_rental_zones end_zone ON b.start_rental_zone_hal_id = end_zone.rental_zone_nk AND b.rental_zone_hal_src = end_zone.rental_zone_src
 """
