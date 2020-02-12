@@ -9,5 +9,6 @@ class CustomPlugin(AirflowPlugin):
     operators = [
         operators.StageS3ToRedshiftOperator,
         operators.DataQualityOperator,
-        operators.LoadDimensionOperator
+        operators.LoadDimensionOperator,
+        operators.LoadFactOperator
     ]

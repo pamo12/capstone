@@ -10,21 +10,21 @@ class LoadDimensionOperator(BaseOperator):
         TRUNCATE TABLE {};
     """
 
-    sql = """
-        INSERT INTO {}
-        {}
+    default_sql = """
+        INSERT into {}
+        DEFAULT VALUES;
     """
 
     @apply_defaults
     def __init__(self,
                  redshift_conn_id,
-                 select_sql,
+                 sql,
                  table,
                  refresh_table,
                  *args, **kwargs):
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
-        self.select_sql = select_sql
+        self.sql = sql
         self.table = table
         self.refresh_table = refresh_table
 
@@ -37,6 +37,11 @@ class LoadDimensionOperator(BaseOperator):
             )
             redshift.run(formatted_truncate_sql)
 
-        redshift.run(self.select_sql)
+            self.log.info(f'Going to insert a Default Entry into {self.table}')
+            formatted_default_sql = LoadDimensionOperator.default_sql.format(
+                self.table
+            )
+            redshift.run(formatted_default_sql)
 
-        self.log.info('Operator not yet implemented')
+        self.log.info(f'Going to execute {self.sql}')
+        redshift.run(self.sql)
