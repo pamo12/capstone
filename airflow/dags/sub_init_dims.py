@@ -1,5 +1,4 @@
 from airflow.models import DAG
-from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.postgres_operator import PostgresOperator
 
 import init_statements
@@ -53,6 +52,13 @@ def init_dims_sub_dag(parent_dag_name, child_dag_name, start_date, redshift_conn
         sql=init_statements.DROP_TABLE_DIM_DATE
     )
 
+    drop_dim_weather_task = PostgresOperator(
+        task_id='drop_dim_weather',
+        dag=dag,
+        postgres_conn_id=redshift_conn_id,
+        sql=init_statements.DROP_TABLE_DIM_WEATHER
+    )
+
     create_dim_vehicles_task = PostgresOperator(
         task_id='create_dim_vehicles',
         dag=dag,
@@ -95,11 +101,19 @@ def init_dims_sub_dag(parent_dag_name, child_dag_name, start_date, redshift_conn
         sql=init_statements.CREATE_TABLE_DIM_DATE
     )
 
+    create_dim_weather_task = PostgresOperator(
+        task_id='create_dim_weather',
+        dag=dag,
+        postgres_conn_id=redshift_conn_id,
+        sql=init_statements.CREATE_TABLE_DIM_WEATHER
+    )
+
     drop_dim_vehicles_task >> create_dim_vehicles_task
     drop_dim_vehicle_models_task >> create_dim_vehicle_models_task
     drop_dim_rental_zones_task >> create_dim_rental_zones_task
     drop_dim_companies_task >> create_dim_companies_task
     drop_dim_categories_task >> create_dim_categories_task
     drop_dim_date_task >> create_dim_date_task
+    drop_dim_weather_task >> create_dim_weather_task
 
     return dag

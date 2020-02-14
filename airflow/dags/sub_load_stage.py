@@ -53,10 +53,32 @@ def load_stage(parent_dag_name, child_dag_name, start_date, redshift_conn_id, aw
         json_path='auto'
     )
 
+    stage_weather_stations_to_redshift = StageS3ToRedshiftOperator(
+        task_id='stage_weather_stations',
+        dag=dag,
+        target_table='stage_weather_stations',
+        redshift_conn_id=redshift_conn_id,
+        aws_credentials_id=aws_creds,
+        s3_bucket=s3_bucket,
+        s3_key='weather/germany_stations_list.txt',
+        json_path='auto'
+    )
+
+    stage_weather_data_to_redshift = StageS3ToRedshiftOperator(
+        task_id='stage_weather_data',
+        dag=dag,
+        target_table='stage_weather_data',
+        redshift_conn_id=redshift_conn_id,
+        aws_credentials_id=aws_creds,
+        s3_bucket=s3_bucket,
+        s3_key='weather/derived_germany_soil_daily_historical',
+        json_path='auto'
+    )
+
     run_quality_checks_stage = DataQualityOperator(
         task_id='data_quality_checks',
         dag=dag,
-        tables='stage_vehicles,stage_rental_zones,stage_bookings,stage_categories',
+        tables='stage_vehicles,stage_rental_zones,stage_bookings,stage_categories,stage_weather_stations,stage_weather_data',
         redshift_conn_id=redshift_conn_id,
         sql='SELECT COUNT(*) FROM {}'
     )
@@ -65,5 +87,7 @@ def load_stage(parent_dag_name, child_dag_name, start_date, redshift_conn_id, aw
     stage_rental_zones_to_redshift >> run_quality_checks_stage
     stage_categories_to_redshift >> run_quality_checks_stage
     stage_bookings_to_redshift >> run_quality_checks_stage
+    stage_weather_stations_to_redshift >> run_quality_checks_stage
+    stage_weather_data_to_redshift >> run_quality_checks_stage
 
     return dag

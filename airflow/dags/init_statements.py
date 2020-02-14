@@ -110,6 +110,10 @@ DROP_TABLE_DIM_DATE = """
     DROP TABLE IF EXISTS public.dim_date;
 """
 
+DROP_TABLE_DIM_WEATHER = """
+    DROP TABLE IF EXISTS public.dim_weather;
+"""
+
 CREATE_TABLE_DIM_VEHICLES = """
     CREATE TABLE public.dim_vehicles (
         vehicle_sk INT IDENTITY(0,1) PRIMARY KEY,
@@ -148,8 +152,8 @@ CREATE_TABLE_DIM_RENTAL_ZONES = """
         type VARCHAR(50) DEFAULT '--',
         city VARCHAR(50) DEFAULT '--',
         country VARCHAR(50) DEFAULT '--',
-        latitude VARCHAR(25) DEFAULT '--',
-        longitude VARCHAR(25) DEFAULT '--',
+        latitude VARCHAR(25) DEFAULT '0',
+        longitude VARCHAR(25) DEFAULT '0',
         is_airport_x BOOLEAN DEFAULT 0,
         is_long_distance_trains_x BOOLEAN DEFAULT 0,
         is_suburban_trains_x BOOLEAN DEFAULT 0,
@@ -192,6 +196,18 @@ CREATE_TABLE_DIM_DATE = """
     );
 """
 
+CREATE_TABLE_DIM_WEATHER = """
+    CREATE TABLE public.dim_weather (
+        weather_sk INT IDENTITY(0,1) PRIMARY KEY,
+        date_value INT NOT NULL DEFAULT 19000101,
+        station_nk INT NOT NULL DEFAULT 0,
+        city VARCHAR(50) DEFAULT '--',
+        width DECIMAL(8,2) DEFAULT 0.0,
+        length DECIMAL(8,2) DEFAULT 0.0,
+        temperature DECIMAL(10,2) DEFAULT 0.0
+    );
+"""
+
 DROP_TABLE_FACT_BOOKINGS = """
     DROP TABLE IF EXISTS fact_bookings;
 """
@@ -202,6 +218,7 @@ CREATE_TABLE_FACT_BOOKINGS = """
         category_fk INT,
         vehicle_fk INT,
         date_booking_fk INT,
+        weather_fk INT,
         date_from_fk INT,
         date_until_fk INT,
         start_rental_zone_fk INT,
@@ -211,5 +228,62 @@ CREATE_TABLE_FACT_BOOKINGS = """
         is_traverse_use BOOLEAN,
         is_extra_booking_fees BOOLEAN,
         technical_income_channel VARCHAR(50)
+    );
+"""
+
+DROP_TABLE_STAGE_WEATHER_STATIONS = """
+    DROP TABLE IF EXISTS stage_weather_stations;
+"""
+
+CREATE_TABLE_STAGE_WEATHER_STATIONS = """
+    CREATE TABLE stage_weather_stations (
+        station_id INT NOT NULL PRIMARY KEY,
+        height INT,
+        width DECIMAL(8,2),
+        length DECIMAL(8,2),
+        name VARCHAR(50),
+        country VARCHAR(50)
+    );
+"""
+
+DROP_TABLE_STAGE_WEATHER_DATA = """
+    DROP TABLE IF EXISTS stage_weather_data;
+"""
+
+CREATE_TABLE_STAGE_WEATHER_DATA = """
+    CREATE TABLE stage_weather_data (
+        station_id INT NOT NULL,
+        date_value INT NOT NULL,
+        vgsl DECIMAL(10,2),
+        vpgb DECIMAL(10,2),
+        vpgh DECIMAL(10,2),
+        ts05 DECIMAL(10,2),
+        ts10 DECIMAL(10,2),
+        ts20 DECIMAL(10,2),
+        ts50 DECIMAL(10,2),
+        ts100 DECIMAL(10,2),
+        zfumi INT,
+        bf10 INT,
+        bf20 INT,
+        bf30 INT,
+        bf40 INT,
+        bf50 INT,
+        bf60 INT,
+        bfgsl INT,
+        bfgls INT,
+        tsls05 DECIMAL(10,2),
+        tssl05 DECIMAL(10,2),
+        ztkmi INT,
+        ztumi INT,
+        vpgpm DECIMAL(10,2),
+        vpmb DECIMAL(10,2),
+        vpwb DECIMAL(10,2),
+        vpzb DECIMAL(10,2),
+        vgl DECIMAL(10,2),
+        vwls DECIMAL(10,2),
+        vwsl DECIMAL(10,2),
+        bfwls INT,
+        bfwsl INT,
+        eor VARCHAR(5)
     );
 """

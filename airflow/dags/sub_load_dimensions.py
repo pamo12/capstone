@@ -65,10 +65,19 @@ def load_dimensions(parent_dag_name, child_dag_name, start_date, redshift_conn_i
         refresh_table=True
     )
 
+    load_weather_dimension = LoadDimensionOperator(
+        task_id='load_weather',
+        dag=dag,
+        redshift_conn_id=redshift_conn_id,
+        sql=load_statements.LOAD_WEATHER,
+        table='dim_weather',
+        refresh_table=True
+    )
+
     run_quality_checks_base_dims = DataQualityOperator(
         task_id='data_quality_checks_base_dims',
         dag=dag,
-        tables='dim_companies,dim_vehicle_models,dim_date',
+        tables='dim_companies,dim_vehicle_models,dim_date,dim_weather',
         redshift_conn_id=redshift_conn_id,
         sql='SELECT COUNT(*) FROM {}'
     )
@@ -84,6 +93,7 @@ def load_dimensions(parent_dag_name, child_dag_name, start_date, redshift_conn_i
     load_vehicle_model_dimension >> run_quality_checks_base_dims
     load_company_dimension >> run_quality_checks_base_dims
     load_date_dimension >> run_quality_checks_base_dims
+    load_weather_dimension >> run_quality_checks_base_dims
 
     run_quality_checks_base_dims >> load_category_dimension
     run_quality_checks_base_dims >> load_vehicle_dimension
