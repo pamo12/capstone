@@ -9,7 +9,7 @@ import sub_load_facts
 
 
 dag = DAG('data_load',
-          description='Populate Immigration data to Redshift',
+          description='Populate Car Sharing data',
           schedule_interval='0 * * * *',
           catchup=False,
           start_date=datetime(2020, 1, 1, 0, 0, 0, 0)

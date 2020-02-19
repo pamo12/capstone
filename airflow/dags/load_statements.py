@@ -88,11 +88,11 @@ LOAD_BOOKING_FACTS = """
      CASE WHEN ca.category_sk IS NULL THEN 0 ELSE ca.category_sk END,
      CASE WHEN v.vehicle_sk IS NULL THEN 0 ELSE v.vehicle_sk END,
      CASE WHEN booking.date_sk IS NULL THEN 0 ELSE booking.date_sk END,
+     CASE WHEN w.weather_sk IS NULL THEN 0 ELSE w.weather_sk END,
      CASE WHEN start_date.date_sk IS NULL THEN 0 ELSE start_date.date_sk END,
      CASE WHEN end_date.date_sk IS NULL THEN 0 ELSE end_date.date_sk END,
      CASE WHEN start_zone.rental_zone_sk IS NULL THEN 0 ELSE start_zone.rental_zone_sk END,
      CASE WHEN end_zone.rental_zone_sk IS NULL THEN 0 ELSE end_zone.rental_zone_sk END,
-     CASE WHEN w.weather_sk IS NULL THEN 0 ELSE w.weather_sk END,
      b.distance,
      DATEDIFF(minutes, b.date_from, b.date_until) AS duration,
      DECODE(traverse_use, 'Ja', 1, 0) AS is_traverse_use,
@@ -105,6 +105,6 @@ LOAD_BOOKING_FACTS = """
     LEFT JOIN dim_date start_date ON DATE(b.date_from) = start_date.date_value
     LEFT JOIN dim_date end_date ON DATE(b.date_until) = end_date.date_value
     LEFT JOIN dim_rental_zones start_zone ON b.start_rental_zone_hal_id = start_zone.rental_zone_nk AND b.rental_zone_hal_src = start_zone.rental_zone_src
-    LEFT JOIN dim_rental_zones end_zone ON b.start_rental_zone_hal_id = end_zone.rental_zone_nk AND b.rental_zone_hal_src = end_zone.rental_zone_src
+    LEFT JOIN dim_rental_zones end_zone ON b.end_rental_zone_hal_id = end_zone.rental_zone_nk AND b.rental_zone_hal_src = end_zone.rental_zone_src
     LEFT JOIN dim_weather w ON start_zone.city = w.city AND to_char(start_date.date_value, 'YYYYmmdd') = w.date_value
 """
