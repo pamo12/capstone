@@ -101,3 +101,25 @@
 | week_day_number | SMALLINT | the number of the given weekday | 6 |
 | day_name | CHAR(9) | the name of the weekday | Sunday |
 | is_weekend | BOOLEAN | Indicator whether the date is on a weekend | 1 |
+
+
+## Facts
+
+### Fact Booking (fact_bookings)
+
+| Field Name | Data Type | Description | Example |
+| -----------|-----------|-------------|---------|
+| booking_nk | INT | the natural key of the booking | 20284653 |
+| category_fk | INT | the foreign key of the referencing category | 36 |
+| vehicle_fk | INT | the foreign key of the referencing vehicle | 1438 |
+| date_booking_fk | INT | the foreign key of the referencing date the trip has been booked | 2754 |
+| weather_fk | INT | the foreign key of the referencing weather entry | 2954 |
+| date_from_fk | INT | the foreign key of the referencing date the trip has started | 2954 |
+| date_until_fk | INT | the foreign key of the referencing date the trip has ended | 1110 |
+| start_rental_zone_fk | INT | the foreign key of the referencing starting rental zone | 1110 |
+| end_rental_zone_fk | INT | the foreign key of the referencing ending rental zone | 3043339 |
+| distance | DECIMAL | the driven distance in km | 216 |
+| duration | INT | the rental duration in minutes | 1920 |
+| is_traverse_use | BOOLEAN | Indicates whether a traverse use is given | 1 |
+| is_extra_booking_fees | BOOLEAN | Indicator whether additional booking feeds apply | 1 |
+| technical_income_channel | VARCHAR(50) | channel through which the rental has been booked | Internet |
