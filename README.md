@@ -24,7 +24,9 @@ The following questions should be answered:
 ![Data Model](resources/img/db-diagram.png "Data Model")
 
 The above ER-Diagram shows the target Data Model that has been designed in order to answer the given questions above.
-It contains of 1 Fact and 7 Dimension Tables. The Fact Table (`fact_bookings) contains metrics about the duration and the distance of a booked car sharing trip. 
+It contains of 1 Fact and 7 Dimension Tables. The Fact Table (`fact_bookings) contains metrics about the duration and the distance of a booked car sharing trip.
+
+Details on the different tables can be found in the  [Data Dictionary](resources/DataDictionary.md).
 
 
 ### ETL pipeline
@@ -32,40 +34,47 @@ There are two pipelines available, one taking care of initializing the Database 
 
 #### Initialization
 ![Init DAG](resources/img/init_main.png "Init DAG")
+
 The initialization Flow is split up into SubDAGs for Stage, Dimensions & Facts.
 
 ##### init_stage_sub_dag
 ![Init Stage SubDAG](resources/img/init_stage.png "Init Stage SubDAG") 
+
 The `init_stage_sub_dag` is in charge of creating the tables necessary to store the Data in the Redshift Database. 
 Each Table is getting dropped if it exists before creating a new version.
 
 ##### init_dims_sub_dag
 ![Init Dims SubDAG](resources/img/init_dims.png "Init Dims SubDAG")
+
 The `init_dims_sub_dag` is in charge of creating the Schema for the necessary Dimension Tables. As well as for the staging tables,
 the tables are dropped (if they exist already) in order to create a fresh copy with the latest changes on the schema.
 
 ##### init_facts_sub_dag
 ![Init Facts SubDAG](resources/img/init_facts.png "Init Facts SubDAG")
+
 The `init_facts_sub_dag` is in charge of creating the tables necessary to store the Data in the Redshift Database. 
 Each Table is getting dropped if it exists before creating a new version.
 
 #### Data Load
 ![Data Load DAG](resources/img/load_main.png "Data Load DAG")
+
 The Data Load DAG is split into three different SubDAGs as well.
 
 ##### load_stage_sub_dag
 ![Data Load Stage SubDAG](resources/img/load_stage.png "Data Load Stage SubDAG") 
+
 The `load_stage_sub_dag` is taking care of loading the data from S3 to Redshift using `COPY` Statements. After loading the data, 
 defined data quality checks are executed. If successful, the Pipeline continues.
 
 ##### load_dimensions_sub_dag
 ![Data Load Dims SubDAG](resources/img/load_dims.png "Data Load Dims SubDAG")
+
 Within `load_dimensions_dag` the Dimensions are created out of the staging tables using SQL. 
 
 ##### load_facts_sub_dag
 ![Data Load Facts SubDAG](resources/img/load_facts.png "Data Load Facts SubDAG")
-Last but not least, `load_facts_sub_dag` loads data into the fact table using SQL.
 
+Last but not least, `load_facts_sub_dag` loads data into the fact table using SQL.
 
 ### Analytical Queries
 
@@ -139,3 +148,5 @@ and to provide additional views on the data if necessary. This will help to incr
 
 ## Setup 
 ### Running the project
+
+
