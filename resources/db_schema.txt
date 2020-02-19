@@ -31,8 +31,8 @@ Table "dim_rental_zones" {
   "type" VARCHAR(50) [default: "--"]
   "city" VARCHAR(50) [default: "--"]
   "country" VARCHAR(50) [default: "--"]
-  "latitude" VARCHAR(25) [default: "--"]
-  "longitude" VARCHAR(25) [default: "--"]
+  "latitude" VARCHAR(25) [default: "0"]
+  "longitude" VARCHAR(25) [default: "0"]
   "is_airport_x" BOOLEAN [default: 0]
   "is_long_distance_trains_x" BOOLEAN [default: 0]
   "is_suburban_trains_x" BOOLEAN [default: 0]
@@ -68,11 +68,22 @@ Table "dim_date" {
   "is_weekend" SMALLINT [not null, default: 0]
 }
 
+Table "dim_weather" {
+  "weather_sk" INT [pk]
+  "date_value" INT [not null, default: 19000101]
+  "station_nk" INT [not null, default: 0]
+  "city" VARCHAR(50) [default: "--"]
+  "width" "DECIMAL(8, 2)" [default: 0.0]
+  "length" "DECIMAL(8, 2)" [default: 0.0]
+  "temperature" "DECIMAL(10, 2)" [default: 0.0]
+}
+
 Table "fact_bookings" {
   "booking_nk" INT [pk, not null]
   "category_fk" INT
   "vehicle_fk" INT
   "date_booking_fk" INT
+  "weather_fk" INT
   "date_from_fk" INT
   "date_until_fk" INT
   "start_rental_zone_fk" INT
@@ -85,24 +96,26 @@ Table "fact_bookings" {
 }
 
 
-Ref: "dim_companies"."company_sk" < "dim_rental_zones"."company_fk"
-
-Ref: "dim_date"."date_sk" < "fact_bookings"."date_booking_fk"
+Ref: "dim_categories"."category_sk" < "fact_bookings"."category_fk"
 
 Ref: "dim_date"."date_sk" < "fact_bookings"."date_from_fk"
 
 Ref: "dim_date"."date_sk" < "fact_bookings"."date_until_fk"
 
-
-
-Ref: "dim_vehicle_models"."vehicle_model_sk" < "dim_vehicles"."vehicle_model_fk"
+Ref: "dim_date"."date_sk" < "fact_bookings"."date_booking_fk"
 
 Ref: "dim_vehicles"."vehicle_sk" < "fact_bookings"."vehicle_fk"
 
+Ref: "dim_vehicle_models"."vehicle_model_sk" < "dim_vehicles"."vehicle_model_fk"
+
 Ref: "dim_companies"."company_sk" < "dim_vehicles"."company_fk"
 
-Ref: "dim_categories"."category_sk" < "fact_bookings"."category_fk"
+Ref: "dim_weather"."weather_sk" < "fact_bookings"."weather_fk"
 
 Ref: "dim_rental_zones"."rental_zone_sk" < "fact_bookings"."start_rental_zone_fk"
 
 Ref: "dim_rental_zones"."rental_zone_sk" < "fact_bookings"."end_rental_zone_fk"
+
+Ref: "dim_companies"."company_sk" < "dim_rental_zones"."company_fk"
+
+Ref: "dim_companies"."company_sk" < "dim_categories"."company_fk"

@@ -1,4 +1,4 @@
-CREATE TABLE public.dim_vehicles (
+    CREATE TABLE public.dim_vehicles (
         vehicle_sk INT IDENTITY(0,1) PRIMARY KEY,
         vehicle_nk INT NOT NULL DEFAULT 0,
         vehicle_model_fk INT NOT NULL DEFAULT 0,
@@ -14,14 +14,14 @@ CREATE TABLE public.dim_vehicles (
         access_control_component_type VARCHAR(50) DEFAULT '--'
     );
 
-CREATE TABLE public.dim_vehicle_models (
+    CREATE TABLE public.dim_vehicle_models (
         vehicle_model_sk INT IDENTITY(0,1) PRIMARY KEY,
         vehicle_manufacturer VARCHAR(50) DEFAULT '--',
         vehicle_model_type VARCHAR(50) DEFAULT '--',
         vehicle_model_name VARCHAR(50) DEFAULT '--'
     );
 
-CREATE TABLE public.dim_rental_zones (
+    CREATE TABLE public.dim_rental_zones (
         rental_zone_sk INT IDENTITY(0,1) PRIMARY KEY,
         rental_zone_nk INT NOT NULL DEFAULT 0,
         rental_zone_src VARCHAR(50) DEFAULT '--',
@@ -31,8 +31,8 @@ CREATE TABLE public.dim_rental_zones (
         type VARCHAR(50) DEFAULT '--',
         city VARCHAR(50) DEFAULT '--',
         country VARCHAR(50) DEFAULT '--',
-        latitude VARCHAR(25) DEFAULT '--',
-        longitude VARCHAR(25) DEFAULT '--',
+        latitude VARCHAR(25) DEFAULT '0',
+        longitude VARCHAR(25) DEFAULT '0',
         is_airport_x BOOLEAN DEFAULT 0,
         is_long_distance_trains_x BOOLEAN DEFAULT 0,
         is_suburban_trains_x BOOLEAN DEFAULT 0,
@@ -40,20 +40,20 @@ CREATE TABLE public.dim_rental_zones (
         is_active BOOLEAN DEFAULT 0
     );
 
-CREATE TABLE public.dim_companies (
+    CREATE TABLE public.dim_companies (
         company_sk INT IDENTITY(0,1) PRIMARY KEY,
         company VARCHAR(255) DEFAULT '--',
         company_group VARCHAR(255) DEFAULT '--'
     );
 
-CREATE TABLE public.dim_categories (
+    CREATE TABLE public.dim_categories (
         category_sk INT IDENTITY(0,1) PRIMARY KEY,
         category_nk INT NOT NULL DEFAULT 0,
         company_fk INT NOT NULL DEFAULT 0,
         category VARCHAR(255) DEFAULT '--'
     );
 
-CREATE TABLE public.dim_date (
+    CREATE TABLE public.dim_date (
         date_sk INT IDENTITY(0,1) PRIMARY KEY,
         date_value Date NOT NULL DEFAULT '1900-01-01',
         year_number SMALLINT NOT NULL DEFAULT 0,
@@ -68,11 +68,24 @@ CREATE TABLE public.dim_date (
         is_weekend SMALLINT NOT NULL DEFAULT 0
     );
 
-CREATE TABLE fact_bookings (
+    CREATE TABLE public.dim_weather (
+        weather_sk INT IDENTITY(0,1) PRIMARY KEY,
+        date_value INT NOT NULL DEFAULT 19000101,
+        station_nk INT NOT NULL DEFAULT 0,
+        city VARCHAR(50) DEFAULT '--',
+        width DECIMAL(8,2) DEFAULT 0.0,
+        length DECIMAL(8,2) DEFAULT 0.0,
+        temperature DECIMAL(10,2) DEFAULT 0.0
+    );
+
+
+
+    CREATE TABLE fact_bookings (
         booking_nk INT NOT NULL PRIMARY KEY,
         category_fk INT,
         vehicle_fk INT,
         date_booking_fk INT,
+        weather_fk INT,
         date_from_fk INT,
         date_until_fk INT,
         start_rental_zone_fk INT,
