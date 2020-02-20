@@ -160,7 +160,7 @@ It is expected, that the following software is available on your system:
 
 #### Sytem Setup
 ```
-# clone or download the project from github and enter the directory
+# clone or download the project from github and enter the projects root-directory
 https://github.com/pamo12/capstone
 ```
 ```
