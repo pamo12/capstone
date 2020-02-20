@@ -144,9 +144,66 @@ Feature to get notified on failures and long running runs.
 
 * Technology-wise, there is no problem having 100+ users accessing the database, as we can scale the number of cluster 
 nodes and their size. Nevertheless, it is helpful to analyse the Requirements of the users to be able to adapt the Scheme accordingly
-and to provide additional views on the data if necessary. This will help to increase the acceptance of the solution. 
+and to provide additional views on the data if necessary. This will help to increase the acceptance of the solution.
+
+* An additional improvement would be to add another DAG which takes care of bootstrapping the necessary infrastructure 
+on AWS
 
 ## Setup 
 ### Running the project
+
+#### Prerequisites
+It is expected, that the following software is available on your system:
+* python3
+* python3-pip
+
+
+#### Sytem Setup
+```
+# clone or download the project from github and enter the directory
+https://github.com/pamo12/capstone
+```
+```
+# set the AIRFLOW_HOME variable
+export AIRFLOW_HOME=$(pwd)/airflow
+```
+```
+# install the necessary dependencies using pip3
+pip3 install -r requirements.txt
+```
+```
+# on ubuntu and maybe other systems, it is necessary to add the users local bin directory to the path
+export PATH=$PATH:~/.local/bin
+```
+```
+# initialize the airflow database within the airflow directory
+cd airflow && airflow initdb
+```
+```
+# start the airflow webserver
+airflow webserver -p 8080
+```
+```
+# start the airflow scheduler
+airflow scheduler
+```
+
+The Airflow UI can be accessed in the Browser: http://localhost:8080
+
+
+#### Airflow Config
+The project is configured to use specific Airflow connections to access S3 and Reshift. Those have to be setup manually.
+
+##### aws_credentials
+Conn Id: Enter aws_credentials. Conn Type: Enter Amazon Web Services. Login: Enter your Access key ID Password: Enter your Secret access key
+
+![AWS Connection](resources/img/aws_credentials.png "AWS Connection")
+
+---
+
+##### redshift
+Conn Id: Enter redshift. Conn Type: Enter Postgres. Host: Enter the endpoint of your Redshift cluster, excluding the port at the end. Schema: This is the Redshift database you want to connect to. Login: Enter Redshift user Password: Enter Redshift password Port: Enter 5439.
+
+![Redshift Connection](resources/img/redshift.png "Redshift Connection")
 
 
